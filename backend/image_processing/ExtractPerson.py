@@ -52,6 +52,10 @@ def segment_person_in_box_with_improvements(image: np.ndarray, person_box: tuple
     # マスクを使用して元の画像から対象領域を切り出す
     segmented_person = cv2.bitwise_and(person_roi, person_roi, mask=mask)
 
+    # モルフォロジー収縮を適用して、領域を縮小する
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))  # 1x1の矩形カーネル
+    mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE, kernel)
+
     # セグメント化された人物領域とマスクを返す
     return segmented_person, mask
 
@@ -66,6 +70,10 @@ def segment_person_in_box_with_improvements(image: np.ndarray, person_box: tuple
 
 
 def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
+    import cv2
+    import numpy as np
+    import os
+
     # モデルファイルの指定
     folder_name = "models"
     proto_path = os.path.join(folder_name, "MobileNetSSD_deploy.prototxt")
@@ -101,12 +109,6 @@ def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
 
     # セグメント処理とマスクの取得
     segmented_person, mask = segment_person_in_box_with_improvements(image, person_box)
-    #segmented_person, mask = segment_person_snake(image, person_box)
-    #segmented_person, mask = snake_segmentation(image, person_box)
-    #segmented_person, mask = coarse_segmentation(image, person_box)
-    #segmented_person, mask = keep_inside_of_contours(image, person_box)
-    
-    
 
     # 背景画像の読み込み
     Public_name = "public"
@@ -118,17 +120,35 @@ def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
     # 背景画像をリサイズして入力画像と同じサイズに
     background = cv2.resize(background, (image.shape[1], image.shape[0]))
 
-    # マスクをリサイズ（入力画像全体用に拡張）
-    full_mask = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
-    x1, y1, x2, y2 = person_box
-    full_mask[y1:y2, x1:x2] = mask
+    # 切り抜いた人物の高さを一定にリサイズ
+    target_height = int(height * 0.8)  # 背景の80%の高さに揃える
+    person_h, person_w = segmented_person.shape[:2]
+    scale = target_height / person_h
+    resized_person = cv2.resize(segmented_person, (int(person_w * scale), target_height))
+    resized_mask = cv2.resize(mask, (int(person_w * scale), target_height), interpolation=cv2.INTER_NEAREST)
+
+    # 背景中心に人物を配置
+    person_h, person_w = resized_person.shape[:2]
+    offset_x = (width - person_w) // 2
+    offset_y = (height - target_height) // 2 + int(height * 0.1)  # Y方向に下寄り
+
+    # マスクと人物画像を背景に貼り付け
+    full_mask = np.zeros((height, width), dtype=np.uint8)
+    full_mask[offset_y:offset_y + person_h, offset_x:offset_x + person_w] = resized_mask
+
+    full_person = np.zeros_like(image)
+    full_person[offset_y:offset_y + person_h, offset_x:offset_x + person_w] = resized_person
 
     # 背景と合成
     inverted_mask = cv2.bitwise_not(full_mask)  # マスクの反転
     background_part = cv2.bitwise_and(background, background, mask=inverted_mask)
-    person_part = cv2.bitwise_and(image, image, mask=full_mask)
+    person_part = cv2.bitwise_and(full_person, full_person, mask=full_mask)
 
     combined = cv2.add(background_part, person_part)
     return combined
+
+
+
+
 
 
