@@ -1,31 +1,96 @@
 import cv2
 import numpy as np
 import os
+from skimage import measure
+from skimage import draw
+from skimage.segmentation import active_contour
+
+############################################################################
+def segment_person_in_box_with_improvements(image: np.ndarray, person_box: tuple) -> np.ndarray:
+    # 入力画像と人物の矩形領域 (person_box) を受け取り、
+    # 人物領域をセグメンテーションして返す関数
+
+    # 矩形の座標 (左上のx, y, 右下のx, y) を展開
+    x1, y1, x2, y2 = person_box
+
+    # Step 1: 矩形領域の切り出し
+    # 入力画像から指定された矩形領域を抽出
+    person_roi = image[y1:y2, x1:x2]
+
+    # Step 2: グレースケール変換
+    # 抽出した人物領域をグレースケール画像に変換
+    gray = cv2.cvtColor(person_roi, cv2.COLOR_BGR2GRAY)
+
+    # Step 3: ぼかし処理でノイズを低減
+    # 高周波ノイズを除去するためにガウシアンフィルタを適用
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    # Step 4: エッジ検出（Canny法）
+    # 画像内のエッジを強調して輪郭抽出を容易にする
+    edges = cv2.Canny(blurred, threshold1=20, threshold2=80)
+
+    # Step 5: エッジの拡張（モルフォロジー変換）
+    # モルフォロジー処理でエッジを補強し、小さな隙間を埋める
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))  # 矩形カーネルを作成
+    edges = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)   # モルフォロジー閉処理を適用
+
+    # Step 6: 輪郭抽出
+    # エッジ画像から輪郭を検出
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 検出された輪郭がない場合のエラーハンドリング
+    if not contours:
+        print("エッジ検出で輪郭が見つかりませんでした。")
+        return person_roi  # 元のROIを返す
+
+    # Step 7: 内部領域を塗りつぶすマスクを作成
+    # 輪郭の内部を完全に塗りつぶしたマスクを作成
+    mask = np.zeros_like(gray)  # 元画像と同じサイズのゼロ配列を生成
+    cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)  # 全ての輪郭を塗りつぶし
+
+    # Step 8: マスクを適用して人物領域を抽出
+    # マスクを使用して元の画像から対象領域を切り出す
+    segmented_person = cv2.bitwise_and(person_roi, person_roi, mask=mask)
+
+    # セグメント化された人物領域とマスクを返す
+    return segmented_person, mask
+
+
+
+
+
+
+
+
+
+
 
 def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
-    # フォルダ名とファイル名の指定
+    # モデルファイルの指定
     folder_name = "models"
-    file_protoname = "MobileNetSSD_deploy.prototxt"
-    file_modelname = "mobilenet_iter_73000.caffemodel"
-    proto_path = os.path.join(folder_name, file_protoname)
-    model_path = os.path.join(folder_name, file_modelname)
+    proto_path = os.path.join(folder_name, "MobileNetSSD_deploy.prototxt")
+    model_path = os.path.join(folder_name, "mobilenet_iter_73000.caffemodel")
     
+    # モデルの存在チェック
+    if not os.path.exists(proto_path) or not os.path.exists(model_path):
+        raise FileNotFoundError("必要なモデルファイルが見つかりません。")
+
     # DNNモデルを読み込む
     net = cv2.dnn.readNetFromCaffe(proto_path, model_path)
 
-    # Step 2: 入力画像を前処理してネットワークに入力
+    # 入力画像の前処理
     height, width = image.shape[:2]
     blob = cv2.dnn.blobFromImage(image, 0.007843, (300, 300), 127.5)
     net.setInput(blob)
     detections = net.forward()
 
-    # Step 3: 人物を検出
+    # 人物検出
     person_box = None
     for i in range(detections.shape[2]):
         confidence = detections[0, 0, i, 2]
         if confidence > 0.6:  # 確信度が60%以上の場合
             class_id = int(detections[0, 0, i, 1])
-            if class_id == 15:  # クラスID15は「person（人物）」を示す
+            if class_id == 15:  # クラスID15は「person（人物）」
                 box = detections[0, 0, i, 3:7] * np.array([width, height, width, height])
                 person_box = box.astype("int")
                 break
@@ -34,28 +99,36 @@ def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
         print("人物が検出されませんでした。")
         return image
 
+    # セグメント処理とマスクの取得
+    segmented_person, mask = segment_person_in_box_with_improvements(image, person_box)
+    #segmented_person, mask = segment_person_snake(image, person_box)
+    #segmented_person, mask = snake_segmentation(image, person_box)
+    #segmented_person, mask = coarse_segmentation(image, person_box)
+    #segmented_person, mask = keep_inside_of_contours(image, person_box)
+    
+    
+
+    # 背景画像の読み込み
+    Public_name = "public"
+    background_path = os.path.join(Public_name, "kyoto.jpg")
+    background = cv2.imread(background_path)
+    if background is None:
+        raise FileNotFoundError(f"背景画像 {background_path} が見つかりません。")
+
+    # 背景画像をリサイズして入力画像と同じサイズに
+    background = cv2.resize(background, (image.shape[1], image.shape[0]))
+
+    # マスクをリサイズ（入力画像全体用に拡張）
+    full_mask = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
     x1, y1, x2, y2 = person_box
+    full_mask[y1:y2, x1:x2] = mask
 
-    # Step 4: 人物部分を切り取る
-    person_roi = image[y1:y2, x1:x2]
+    # 背景と合成
+    inverted_mask = cv2.bitwise_not(full_mask)  # マスクの反転
+    background_part = cv2.bitwise_and(background, background, mask=inverted_mask)
+    person_part = cv2.bitwise_and(image, image, mask=full_mask)
 
-    # Step 5: マスクを作成
-    # 画像全体をゼロで初期化したマスク
-    mask = np.zeros(image.shape[:2], dtype=np.uint8)
-    
-    # 画像の人物領域を白く塗ることで、マスクを作成
-    mask[y1:y2, x1:x2] = 255  # 白い部分が人物領域になる
-    
-    # Step 6: マスクを使用して人物を切り取る
-    masked_person = cv2.bitwise_and(image, image, mask=mask)
+    combined = cv2.add(background_part, person_part)
+    return combined
 
-    # Step 7: 白背景を作成し、切り取った人物部分を貼り付け
-    
-    white_background = np.ones_like(image) * 0
-    
-    # 背景に人物を載せる位置
-    y_offset = (white_background.shape[0] - (y2 - y1)) // 2
-    x_offset = (white_background.shape[1] - (x2 - x1)) // 2
-    white_background[y_offset:y_offset + (y2 - y1), x_offset:x_offset + (x2 - x1)] = masked_person[y1:y2, x1:x2]
 
-    return white_background
