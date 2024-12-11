@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+
 import ImageUpload from "./components/ImageUpload";
 import applyAnimeStyle from "./components/animeStyle";
 import applySepiaStyle from "./components/SepiaStyle";
