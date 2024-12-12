@@ -1,0 +1,12 @@
+.stagecontainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    overflow: hidden; /* はみ出し部分を隠す */
+    position: relative;
+    width: 100%; /* 横幅いっぱい */
+    height: auto; /* 高さは動的に調整 */
+  }
+  
