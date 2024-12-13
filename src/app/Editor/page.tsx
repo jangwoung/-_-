@@ -2,15 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-
-import ImageUpload from "./components/ImageUpload";
-import applyAnimeStyle from "./components/animeStyle";
-import applySepiaStyle from "./components/SepiaStyle";
-//import CanvasEditor from "./components/CanvasEditor";
+import styles from "./editor.module.css"
+import ImageUpload from "../components/ImageUpload";
+import applyAnimeStyle from "../components/animeStyle";
+import applySepiaStyle from "../components/SepiaStyle";
+//import CanvasEditor from "../components/CanvasEditor";
 import dynamic from "next/dynamic";
 
 
-const CanvasEditor = dynamic(() => import("./components/CanvasEditor"), {
+const CanvasEditor = dynamic(() => import("../components/CanvasEditor"), {
   ssr: false,
 });
 
@@ -90,35 +90,12 @@ const App: React.FC = () => {
 
 
   return (
-    <div style={{ textAlign: "center" }}>
-      <Link href ="/Editor">
-      <button>編集ページへ</button>
+    <div className={styles.body}>
+      <Link href ="/">
+      <button>本ページへ</button>
       </Link>
-      <h1>画像処理アプリ</h1>
-      <ImageUpload onImageUpload={handleImageUpload} />
-      <div style={{ marginTop: "20px" }}>
-        {processedImage && (
-          <>
-            <img src={processedImage} alt="処理済み画像" style={{ maxWidth: "100%" }} />
-            <div style={{ marginTop: "10px" }}>
-              <button onClick={handleAnimeStyle}>アニメ風に変換</button>
-              <button onClick={handleSepiaStyle}>セピア風に変換</button>
-            </div>
-          </>
-        )}
-        {animeImage && (
-          <img src={animeImage} alt="アニメ風画像" style={{ maxWidth: "100%", marginTop: "10px" }} />
-        )}
-        {sepiaImage && (
-          <img src={sepiaImage} alt="セピア風画像" style={{ maxWidth: "100%", marginTop: "10px" }} />
-        )}
-        <h1>画像編集アプリ</h1>
-        <CanvasEditor />
-      </div>
-
-      
-
-      
+      <h1>画像編集アプリ</h1>
+      <CanvasEditor />     
     </div>
   );
 };

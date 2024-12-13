@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+#OpenCV + GrabCut (軽量手法)
 
 def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
     # 画像のサイズを取得

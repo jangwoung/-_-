@@ -1,0 +1,25 @@
+.iconbuttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .iconbutton {
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .iconbutton:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .iconbutton:active {
+    background-color: #e0e0e0;
+  }
+  
