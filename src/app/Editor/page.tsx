@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import styles from "./editor.module.css"
+import styles from "./editor.module.css";
 import ImageUpload from "../components/ImageUpload";
 import applyAnimeStyle from "../components/animeStyle";
 import applySepiaStyle from "../components/SepiaStyle";
@@ -11,7 +11,6 @@ import dynamic from "next/dynamic";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faThumbsUp } from '@fortawesome/free-solid-svg-icons'
-
 
 const CanvasEditor = dynamic(() => import("../components/CanvasEditor"), {
   ssr: false,
@@ -66,40 +65,40 @@ const App: React.FC = () => {
     }
   };
 
- const handleSepiaStyle = async () => {
-  if (!processedImage) {
-    alert("合成画像を生成してください");
-    return;
-  }
-
-  try {
-    // 合成画像をURLでなくBlobとして取得する
-    const response = await fetch(processedImage); // 画像URLをフェッチ
-    const blob = await response.blob(); // Blobに変換
-
-    // セピア風に変換
-    const sepiaImageUrl = await applySepiaStyle(blob); // applySepiaStyleがBlobを受け取る
-
-    if (sepiaImageUrl) {
-      setSepiaImage(sepiaImageUrl); // セピア風画像を表示
-    } else {
-      alert("セピア風変換に失敗しました");
+  const handleSepiaStyle = async () => {
+    if (!processedImage) {
+      alert("合成画像を生成してください");
+      return;
     }
-  } catch (error) {
-    console.error("エラー:", error);
-    alert("セピア風画像変換に問題が発生しました");
-  }
-};
 
+    try {
+      // 合成画像をURLでなくBlobとして取得する
+      const response = await fetch(processedImage); // 画像URLをフェッチ
+      const blob = await response.blob(); // Blobに変換
+
+      // セピア風に変換
+      const sepiaImageUrl = await applySepiaStyle(blob); // applySepiaStyleがBlobを受け取る
+
+      if (sepiaImageUrl) {
+        setSepiaImage(sepiaImageUrl); // セピア風画像を表示
+      } else {
+        alert("セピア風変換に失敗しました");
+      }
+    } catch (error) {
+      console.error("エラー:", error);
+      alert("セピア風画像変換に問題が発生しました");
+    }
+  };
 
   return (
     <div className={styles.body}>
-      <Link href ="/">
-      <button>本ページへ</button>
+      <Link href="/">
+        <button>本ページへ</button>
       </Link>
       <h1>画像編集アプリ</h1>
       <CanvasEditor /> 
       <FontAwesomeIcon icon={faThumbsUp} className="fa-fw" />    
+
     </div>
   );
 };
