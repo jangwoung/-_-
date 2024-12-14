@@ -13,29 +13,81 @@ interface ImageEditorProps {
   objects: ObjectProps[];
   setObjects: React.Dispatch<React.SetStateAction<ObjectProps[]>>;
   stageRef: React.RefObject<Konva.Stage>;
+  reductionLevel: number;
 }
 
-const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, objects,setObjects,stageRef }) => {
+const ImageEditor = ({ 
+  imageUrl, 
+  objects, 
+  setObjects, 
+  stageRef, 
+  reductionLevel 
+}: ImageEditorProps) => {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [processedImage, setProcessedImage] = useState<HTMLImageElement | null>(null);
   const imageRef = useRef<ImageType>(null);
   const transformerRef = useRef<any>(null);
   const [isSelected, setIsSelected] = useState(false);
   const [selectedObjectId, setSelectedObjectId] = useState<number | null>(null);
 
 
-  useEffect(() => {
-    const img = new window.Image();
-    img.src = imageUrl;
-    img.onload = () => {
-      setImage(img);
+    // 減色処理関数
+    const reduceColors = (imageElement: HTMLImageElement, levels: number): HTMLImageElement => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+    
+      if (!ctx) throw new Error('Canvas context not available');
+    
+      canvas.width = imageElement.width;
+      canvas.height = imageElement.height;
+    
+      ctx.drawImage(imageElement, 0, 0, imageElement.width, imageElement.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+    
+      // 分割幅を計算
+      const step = 255 / (levels - 1);
+    
+      for (let i = 0; i < data.length; i += 4) {
+        // 各チャンネルを最も近いレベルにマッピング
+        data[i] = Math.round(data[i] / step) * step;       // Red
+        data[i + 1] = Math.round(data[i + 1] / step) * step; // Green
+        data[i + 2] = Math.round(data[i + 2] / step) * step; // Blue
+      }
+    
+      ctx.putImageData(imageData, 0, 0);
+    
+      const reducedImage = new Image();
+      reducedImage.src = canvas.toDataURL();
+      return reducedImage;
     };
-  }, [imageUrl]);
+    
+    // 画像読み込み時の処理
+    useEffect(() => {
+      const img = new window.Image();
+      img.src = imageUrl;
+      img.onload = () => {
+        setImage(img);
+        // 初期状態で元の画像を設定
+        setProcessedImage(img);
+      };
+    }, [imageUrl]);
+  
+    // 減色レベルが変更された時の処理
+    useEffect(() => {
+      if (image) {
+        // 画像を減色処理
+        const reduced = reduceColors(image, reductionLevel);
+        reduced.onload = () => {
+          setProcessedImage(reduced);
+        };
+      }
+    }, [reductionLevel, image]);
 
-    const handleSelect = () => {
-        setIsSelected(true);
-    };
-
-
+//以下画像の大きさについて
+  const handleSelect = () => {
+    setIsSelected(true);
+  };
 
     const handleObjectClick = (obj: ObjectProps) => {
     setSelectedObjectId(obj.id);
@@ -100,6 +152,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, objects,setObjects,
     }
     return null;
   };
+  
 
   return (
     <Stage 
@@ -110,11 +163,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, objects,setObjects,
       ref={stageRef} 
     >
       <Layer>
-        {image && (
+        {processedImage && (
           <>
             <KonvaImage
               ref={imageRef}
-              image={image}
+              image={processedImage}
               x={0}
               y={0}
               width={260}
