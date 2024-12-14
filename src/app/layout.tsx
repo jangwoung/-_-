@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="jp">
       <body
-        className={`${zenMaruGodhic.className} antialiased bg-green-light sm:file:bg-beige text-base-black flex justify-center`}
+        className={`${zenMaruGodhic.className} antialiased bg-green-dark sm:file:bg-beige text-base-black flex justify-center`}
       >
         <div className="w-screen min-h-svh sm:w-[420px] sm:min-h-screen bg-green-light">
           {children}
