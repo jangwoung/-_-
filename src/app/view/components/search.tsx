@@ -104,7 +104,7 @@ export const Search: React.FC<SearchProps> = ({
   const [prefectureOpen, setPrefectureOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
   const [selectedPrefecture, setSelectedPrefecture] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedCity, setSelectedCity] = useState("heko");
 
   const pathname = usePathname();
   const router = useRouter();
@@ -222,7 +222,7 @@ export const Search: React.FC<SearchProps> = ({
               )}
             </div>
             <button
-              className="py-2 mt-8 mx-[18vw] sm:mx-[40px] w-[64vw] sm:w-[280px] bg-green-light text-white text-center font-bold rounded-lg"
+              className="py-2 mt-8 mx-[18vw] sm:mx-[120px] w-[64vw] sm:w-[280px] bg-green-light text-white text-center font-bold rounded-lg"
               onClick={() => handleSetQuery(selectedPrefecture, selectedCity)}
             >
               「市か区」

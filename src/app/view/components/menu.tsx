@@ -4,6 +4,7 @@ import {
   faTicket,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
+
 import Link from "next/link";
 
 interface MenuProps {
