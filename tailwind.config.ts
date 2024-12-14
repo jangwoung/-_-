@@ -29,8 +29,8 @@ export default {
         },
       },
       animation: {
-        "flow-right": "flowRight 32s linear infinite",
-        "flow-left": "flowLeft 32s linear infinite",
+        "flow-right": "flowRight 60s linear infinite",
+        "flow-left": "flowLeft 60s linear infinite",
       },
     },
   },
