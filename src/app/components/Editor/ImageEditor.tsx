@@ -4,14 +4,18 @@ import { Stage, Layer, Image as KonvaImage, Transformer, Rect, Text } from 'reac
 import { Image as ImageType } from 'konva/lib/shapes/Image';
 import { ObjectProps } from "./Object/types";
 import Konva from 'konva';
+//関数
+import {exportToImage} from"../utils/exportImage";
+import { redirectToVoucher } from "../utils/redirectToVoucher";
 
 interface ImageEditorProps {
   imageUrl: string;
   objects: ObjectProps[];
   setObjects: React.Dispatch<React.SetStateAction<ObjectProps[]>>;
+  stageRef: React.RefObject<Konva.Stage>;
 }
 
-const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, objects,setObjects }) => {
+const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, objects,setObjects,stageRef }) => {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const imageRef = useRef<ImageType>(null);
   const transformerRef = useRef<any>(null);
@@ -31,7 +35,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, objects,setObjects 
         setIsSelected(true);
     };
 
-    const stageRef = useRef<Konva.Stage>(null);
+
 
     const handleObjectClick = (obj: ObjectProps) => {
     setSelectedObjectId(obj.id);
@@ -89,12 +93,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ imageUrl, objects,setObjects 
     }
   };
 
+  const exportToImage = () => {
+    if (stageRef.current) {
+      const dataURL = stageRef.current.toDataURL();
+      return dataURL;
+    }
+    return null;
+  };
+
   return (
     <Stage 
       width={260}
       height={260}
       onMouseDown={handleDeselect}
-      onClick={handleStageClick}  
+      onClick={handleStageClick} 
+      ref={stageRef} 
     >
       <Layer>
         {image && (
