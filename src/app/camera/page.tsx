@@ -3,34 +3,74 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../lib/firebase/config";
 
 export default function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const router = useRouter();
-
-  const initializeCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-    } catch (err) {
-      console.error("カメラの初期化に失敗しました:", err);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    initializeCamera();
+    const currentVideoRef = videoRef.current;
+    let currentStream: MediaStream | null = null;
+
+    const initializeCamera = async () => {
+      try {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => track.stop());
+        }
+
+        setIsLoading(true);
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+
+        streamRef.current = stream;
+        currentStream = stream;
+
+        if (currentVideoRef) {
+          currentVideoRef.srcObject = stream;
+
+          const playPromise = currentVideoRef.play();
+
+          if (playPromise !== undefined) {
+            playPromise.catch((error) => {
+              console.error("Error playing video:", error);
+              setIsLoading(false);
+            });
+          }
+
+          currentVideoRef.onloadedmetadata = () => {
+            setIsLoading(false);
+          };
+        }
+      } catch (err) {
+        console.error("カメラの初期化に失敗しました:", err);
+        setIsLoading(false);
+      }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        console.log(uid);
+        initializeCamera();
+      } else {
+        redirect("/login");
+      }
+    });
 
     return () => {
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
+      unsubscribe();
+
+      if (currentStream) {
+        currentStream.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -63,6 +103,8 @@ export default function Camera() {
 
         const dataURL = canvas.toDataURL("image/png");
         setPhoto(dataURL);
+
+        console.log(dataURL);
       }
     }
   };
@@ -88,6 +130,11 @@ export default function Camera() {
       } catch (err) {
         console.error("エラーが発生しました:", err);
       }
+  const resetCamera = () => {
+    setPhoto(null);
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
     }
   };
 
@@ -95,16 +142,23 @@ export default function Camera() {
     <div className="relative w-full h-screen bg-green-dark overflow-hidden">
       {!photo ? (
         <div>
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-white">カメラを読み込んでいます...</p>
+            </div>
+          )}
           <video
             ref={videoRef}
             className="absolute inset-0 w-full pt-24 aspect-[3/4] object-cover"
             playsInline
+            muted
           />
           <canvas ref={canvasRef} className="hidden"></canvas>
           <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2">
             <button
               onClick={takePhoto}
-              className="bg-green-light w-20 h-20 rounded-full flex justify-center items-center"
+              disabled={isLoading}
+              className="bg-green-light w-20 h-20 rounded-full flex justify-center items-center disabled:opacity-50"
             >
               <div className="bg-black w-[72px] h-[72px] rounded-full flex justify-center items-center">
                 <div className="bg-green-light w-16 h-16 rounded-full"></div>
