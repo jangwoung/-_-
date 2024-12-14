@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../lib/firebase/config";
@@ -12,9 +12,9 @@ export default function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photo, setPhoto] = useState<string | null>(null);
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const streamRef = useRef<MediaStream | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const currentVideoRef = videoRef.current;
@@ -109,6 +109,14 @@ export default function Camera() {
     }
   };
 
+  const resetCamera = () => {
+    setPhoto(null);
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+    }
+  };
+
   const sendImage = async () => {
     if (photo) {
       const blob = await fetch(photo).then((res) => res.blob());
@@ -130,13 +138,9 @@ export default function Camera() {
       } catch (err) {
         console.error("エラーが発生しました:", err);
       }
-  const resetCamera = () => {
-    setPhoto(null);
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
     }
   };
+
 
   return (
     <div className="relative w-full h-screen bg-green-dark overflow-hidden">
@@ -176,7 +180,7 @@ export default function Camera() {
             className="w-full h-auto object-contain"
           />
           <button
-            onClick={initializeCamera}
+            onClick={resetCamera}
             className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
           >
             戻る
@@ -187,6 +191,7 @@ export default function Camera() {
           >
             次へ
           </button>
+
         </div>
       )}
     </div>
