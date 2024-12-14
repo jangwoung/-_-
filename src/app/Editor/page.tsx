@@ -9,6 +9,9 @@ import applySepiaStyle from "../components/SepiaStyle";
 //import CanvasEditor from "../components/CanvasEditor";
 import dynamic from "next/dynamic";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faThumbsUp } from '@fortawesome/free-solid-svg-icons'
+
 
 const CanvasEditor = dynamic(() => import("../components/CanvasEditor"), {
   ssr: false,
@@ -95,7 +98,8 @@ const App: React.FC = () => {
       <button>本ページへ</button>
       </Link>
       <h1>画像編集アプリ</h1>
-      <CanvasEditor />     
+      <CanvasEditor /> 
+      <FontAwesomeIcon icon={faThumbsUp} className="fa-fw" />    
     </div>
   );
 };

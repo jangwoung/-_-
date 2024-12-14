@@ -112,8 +112,7 @@ const App: React.FC = () => {
         {sepiaImage && (
           <img src={sepiaImage} alt="セピア風画像" style={{ maxWidth: "100%", marginTop: "10px" }} />
         )}
-        <h1>画像編集アプリ</h1>
-        <CanvasEditor />
+
       </div>
 
       

@@ -10,3 +10,45 @@
     height: auto; /* 高さは動的に調整 */
   }
   
+  .canvasContainer {
+    display: flex;
+  }
+  
+  .stageContainer {
+    flex: 3;
+  }
+  
+  .listContainer {
+    flex: 1;
+    padding: 16px;
+    background: #f4f4f4;
+    overflow-y: auto;
+  }
+  
+  .listItem {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .CunvasBack{
+    display: flex;
+    background-color: #f4f4f4e7;
+  }
+
+  .stage{
+    width: 300;
+    height: 300;
+    background-color: #f4f4f431;
+  }
+
+  .ButtonImageUpload{
+    position: absolute;
+    top: 30%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border-Radius: 5px;
+  }
