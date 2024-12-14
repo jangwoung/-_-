@@ -26,17 +26,17 @@ def process_image():
     if file.filename == '':
         return "ファイルが選択されていません", 400
 
-    #デコード
+    # デコード
     image = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
 
     # 人物検出処理
     try:
-        image = extract_person_and_attach_dnn(image)  # 人物検出関数を呼び出す
+        processed_image = extract_person_and_attach_dnn(image)
     except RuntimeError as e:
         return str(e), 500
 
-    #エンコード
-    _, buffer = cv2.imencode('.jpg', image)
+    # エンコード
+    _, buffer = cv2.imencode('.jpg', processed_image)
 
     return send_file(
         io.BytesIO(buffer.tobytes()),
@@ -44,6 +44,7 @@ def process_image():
         as_attachment=False,
         download_name='processed.jpg'
     )
+
 #################################################################################
 #アニメ風変換
 @app.route('/anime-style', methods=['POST'])

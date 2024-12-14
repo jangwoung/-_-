@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ObjectProps } from "./Object/types"; // ObjectProps型をインポート
-import { FaDeleteLeft, FaArrowUp, FaArrowLeft } from "react-icons/fa6"; // アイコンをインポート
+import { FaDeleteLeft, FaAngleUp, FaAngleDown } from "react-icons/fa6"; // アイコンをインポート
 
 type SidebarProps = {
   objects: ObjectProps[];
@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ objects, setObjects }) => {
 
           {selectedId === obj.id && (
             <div style={{ display: "flex", alignItems: "center" }}>
-              <FaArrowUp
+              <FaAngleUp
                 onClick={(e) => {
                   e.stopPropagation();
                   moveItem(index, "up");
@@ -99,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ objects, setObjects }) => {
                   fontSize: "18px",
                 }}
               />
-              <FaArrowLeft
+              <FaAngleDown
                 onClick={(e) => {
                   e.stopPropagation();
                   moveItem(index, "down");

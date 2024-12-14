@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const router = useRouter();
 
   const initializeCamera = async () => {
     try {
@@ -25,7 +27,6 @@ export default function Camera() {
   useEffect(() => {
     initializeCamera();
 
-    // コンポーネントがアンマウントされたときにカメラを停止
     return () => {
       if (videoRef.current?.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
@@ -66,9 +67,28 @@ export default function Camera() {
     }
   };
 
-  const resetCamera = () => {
-    setPhoto(null); // 撮影した画像をリセット
-    initializeCamera(); // カメラを再初期化
+  const sendImage = async () => {
+    if (photo) {
+      const blob = await fetch(photo).then((res) => res.blob());
+      const formData = new FormData();
+      formData.append("image", blob, "captured.png");
+
+      try {
+        const response = await fetch("http://localhost:5000/process-image", {
+          method: "POST",
+          body: formData,
+        });
+        if (response.ok) {
+          const result = await response.blob();
+          const resultURL = URL.createObjectURL(result);
+          router.push(`/sinthesisImage?image=${encodeURIComponent(resultURL)}`);
+        } else {
+          console.error("画像処理に失敗しました:", await response.text());
+        }
+      } catch (err) {
+        console.error("エラーが発生しました:", err);
+      }
+    }
   };
 
   return (
@@ -94,7 +114,6 @@ export default function Camera() {
         </div>
       ) : (
         <div className="relative w-full h-full flex flex-col items-center justify-center">
-          {/* 撮影した画像を表示 */}
           <Image
             src={photo}
             width={400}
@@ -103,10 +122,16 @@ export default function Camera() {
             className="w-full h-auto object-contain"
           />
           <button
-            onClick={resetCamera}
+            onClick={initializeCamera}
             className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
           >
             戻る
+          </button>
+          <button
+            onClick={sendImage}
+            className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg"
+          >
+            次へ
           </button>
         </div>
       )}
