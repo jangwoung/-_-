@@ -62,6 +62,8 @@ export default function Camera() {
 
         const dataURL = canvas.toDataURL("image/png");
         setPhoto(dataURL);
+
+        console.log(dataURL);
       }
     }
   };
