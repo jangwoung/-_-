@@ -22,12 +22,8 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/app/test-modal"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/Editor/IconButtons", "src/app/components/Editor/ColorReducer",
+    "src/app/test-modal"],
+
   "exclude": ["node_modules"]
 }
