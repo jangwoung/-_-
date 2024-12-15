@@ -57,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ objects, setObjects }) => {
         overflowY: "auto",
       }}
     >
-      <h3>Object Manager</h3>
+      <h3>Object</h3>
       {objects.map((obj, index) => (
         <div
           key={obj.id}

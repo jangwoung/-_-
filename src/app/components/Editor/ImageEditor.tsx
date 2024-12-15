@@ -85,13 +85,14 @@ const ImageEditor = ({
     }, [reductionLevel, image]);
 
 //以下画像の大きさについて
+
   const handleSelect = () => {
     setIsSelected(true);
   };
 
-    const handleObjectClick = (obj: ObjectProps) => {
+  const handleObjectClick = (obj: ObjectProps) => {
     setSelectedObjectId(obj.id);
-    };
+  };
 
     const handleStageClick = (event: Konva.KonvaEventObject<MouseEvent>) => {
     // クリックされたオブジェクトがない場合、選択を解除
@@ -195,7 +196,8 @@ const ImageEditor = ({
         )}
 
         {/* 長方形の描画 */}
-        {objects.map((obj) =>
+         {/* 長方形の描画 */}
+         {objects.map((obj) =>
             obj.type === "shape" ? (
                 <React.Fragment key={obj.id}>
                 <Rect
