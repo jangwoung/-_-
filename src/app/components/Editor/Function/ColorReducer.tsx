@@ -1,63 +1,40 @@
-import React, { useState, useRef, useEffect } from "react";
+// components/Editor/Function/ColorReducer.tsx
+import React, { useState } from "react";
+import { Modal } from "../../../components/modal";
+interface ColorReducerProps {
+  level: number;
+  onReductionLevelChange: (newLevel: number) => void;
+}
 
-type ColorReducerProps = {
-  image: HTMLImageElement | undefined;  // 修正: HTMLImageElement | undefined
-  onColorReduced: (image: HTMLImageElement) => void;
-};
 
-const ColorReducer: React.FC<ColorReducerProps> = ({ image, onColorReduced }) => {
-  const [colorCount, setColorCount] = useState(16);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const ColorReducer: React.FC<ColorReducerProps> = ({ level, onReductionLevelChange }) => {
+  const [isOpened, setIsOpened] = useState(false);
+  // 四角形を追加する関数
+  const returncolor = () => {
 
-  useEffect(() => {
-    if (image && canvasRef.current) {
-      applyColorReduction(colorCount);
-    }
-  }, [image, colorCount]);
-
-  const applyColorReduction = (colors: number) => {
-    if (!image || !canvasRef.current) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = image.width;
-    canvas.height = image.height;
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    const factor = 256 / colors;
-    for (let i = 0; i < data.length; i += 4) {
-      data[i] = Math.floor(data[i] / factor) * factor;
-      data[i + 1] = Math.floor(data[i + 1] / factor) * factor;
-      data[i + 2] = Math.floor(data[i + 2] / factor) * factor;
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-
-    // 新しい画像を生成
-    const reducedImage = new Image();
-    reducedImage.src = canvas.toDataURL();
-    reducedImage.onload = () => {
-      // 親コンポーネントに新しい画像を渡す
-      onColorReduced(reducedImage);
-    };
   };
-
   return (
-    <div>
+
+    <div className="flex flex-col items-center justify-start">
+      <div
+        id="modalContent"
+        className={`fixed p-0 z-[100] flex h-[55vh] w-screen sm:w-[420px] sm:w-lg xl:w-xl scroll-mt-0 flex-col items-center hidden-scrollbar rounded-t-2xl bg-white pb-12 duration-200 delay-75 shadow-[0_-8px_12px_4px_rgba(0,0,0,0.3)]
+        `}
+      >
+
+
+      <h1 className="mt-8 mb-2 font-bold text-2xl">減色フィルター</h1>
+      <h1 className="mt-8 mb-2 font-bold text-2xl">level: {level}</h1>
       <input
         type="range"
+        id="color-level"
         min="2"
         max="32"
-        value={colorCount}
-        onChange={(e) => setColorCount(Number(e.target.value))}
+        value={level}
+        onChange={(e) => onReductionLevelChange(Number(e.target.value))}
+        className="slider"
       />
-      <span>Colors: {colorCount}</span>
-      <canvas ref={canvasRef} style={{ display: "none" }} /> {/* canvasは表示しない */}
+    </div>
     </div>
   );
 };

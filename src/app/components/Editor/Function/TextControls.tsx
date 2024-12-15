@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ObjectProps } from "../Object/types"; // ObjectProps型をインポート
+import { Modal } from "../../../components/modal";
 
 type TextControlsProps = {
   setObjects: React.Dispatch<React.SetStateAction<ObjectProps[]>>;
@@ -10,6 +11,7 @@ const TextControls: React.FC<TextControlsProps> = ({ setObjects }) => {
   const [fontSize, setFontSize] = useState(20);
   const [fill, setFill] = useState("#000000");
   const [fontFamily, setFontFamily] = useState("Arial");
+  const [isOpened, setIsOpened] = useState(false);
 
   const addText = () => {
     setObjects((prev) => [
@@ -28,8 +30,14 @@ const TextControls: React.FC<TextControlsProps> = ({ setObjects }) => {
   };
 
   return (
-    <div style={{ padding: "10px", background: "#f4f4f4", borderRadius: "4px" }}>
-      <h3>Text Controls</h3>
+    <div className="flex flex-col items-center justify-start">
+    <div
+      id="modalContent"
+      className={`fixed p-0 z-[100] flex h-[55vh] w-screen sm:w-[420px] sm:w-lg xl:w-xl scroll-mt-0 flex-col items-center hidden-scrollbar rounded-t-2xl bg-white pb-12 duration-200 delay-75 shadow-[0_-8px_12px_4px_rgba(0,0,0,0.3)]
+      `}
+    >
+    <h1 className="mt-8 mb-2 font-bold text-2xl">テキスト</h1>
+    <div className="flex flex-col items-start justify-start">
       <div style={{ marginBottom: "10px" }}>
         <label>Text:</label>
         <input
@@ -70,10 +78,13 @@ const TextControls: React.FC<TextControlsProps> = ({ setObjects }) => {
           <option value="Georgia">Georgia</option>
         </select>
       </div>
+      </div>
       <button onClick={addText} style={{ marginTop: "10px" }}>
-        Add Text
+      <h1 className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg">追加</h1>
       </button>
     </div>
+    </div>
+
   );
 };
 
