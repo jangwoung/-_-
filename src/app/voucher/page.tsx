@@ -1,41 +1,50 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Modal } from "../components/modal";
-//import { generateLocationText } from "../textGenerator/generateText";
+import { generateLocationText } from "../textGenerator/generateText";
+
+import { getDownloadURL, ref } from "firebase/storage";
+import { storage } from "../../../lib/firebase/config";
+
+const fetchDownloadURL = async (storagePath: string): Promise<string> => {
+  const storageRef = ref(storage, storagePath);
+  return await getDownloadURL(storageRef);
+};
 
 export default function Voucher() {
   const [isOpened, setIsOpened] = useState(false);
-  const [imagePath, setImagePath] = useState<string | null>(null);
+  const [imageURL, setImageURL] = useState<string | null>(null);
   const [locationText, setLocationText] = useState({
     descriptor: "・・・",
     dialect: "・・・",
-    description: "　"
+    description: "　",
   });
 
   useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/get-latest-image');
-        const data = await response.json();
-        
-        if (data.success) {
-          setImagePath(data.imagePath);
-        } else {
-          console.error("画像の取得に失敗しました");
+    // Load image from Firebase Storage
+    const loadImage = async () => {
+      const sessionImagePath = sessionStorage.getItem("imageURL");
+
+      if (sessionImagePath) {
+        try {
+          const downloadURL = await fetchDownloadURL(sessionImagePath);
+          setImageURL(downloadURL); // Set the resolved URL to state
+        } catch (error) {
+          console.error("Failed to fetch image URL from Firebase:", error);
         }
-      } catch (error) {
-        console.error("エラーが発生しました:", error);
+      } else {
+        console.error("No image path found in sessionStorage");
       }
     };
-/*
+
+    // Load location text
     const loadLocationText = async () => {
       const text = await generateLocationText("福岡");
       setLocationText(text);
     };
 
-    
-    loadLocationText();*/
-    fetchImage();
+    loadImage();
+    loadLocationText();
   }, []);
 
   return (
@@ -48,7 +57,7 @@ export default function Voucher() {
         </div>
       </Modal>
 
-      <div className="mt-16 text-xl text-base-black font-bold ">
+      <div className="mt-16 text-xl text-base-black font-bold">
         <p>私は</p>
         <h1 className="flex justify-center items-end text-4xl mt-1 mb-4">
           「{locationText.descriptor}」
@@ -56,13 +65,13 @@ export default function Voucher() {
         <p>の観光大臣！</p>
       </div>
 
-      {/* 写真表示 */}
+      {/* Image display */}
       <div className="mt-8 w-[400px] h-[300px] shadow-lg bg-gray-400">
-        {imagePath ? (
-          <img 
-            src={`http://localhost:5000${imagePath}`} 
-            alt="Latest Image"  
-            className="w-full h-full object-cover rounded-md" 
+        {imageURL ? (
+          <img
+            src={imageURL} // Use the resolved URL here
+            alt="Latest Image"
+            className="w-full h-full object-cover rounded-md"
           />
         ) : (
           <p>画像を読み込んでいます...</p>

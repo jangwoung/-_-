@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useEffect , useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { redirect } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import Konva from 'konva';
+import Konva from "konva";
 //コンポーネント
 import Sidebar from "../components/Editor/Sidebar";
 import ImageEditor from "../components/Editor/ImageEditor";
@@ -13,8 +13,11 @@ import TextControls from "../components/Editor/Function/TextControls";
 import ShapeControls from "../components/Editor/Function/ShapeControls";
 // モジュールスタイル
 import styles from "../components/Editor/styles/canvas.module.css";
-import {exportToImage} from"../components/utils/exportImage";
+import { exportToImage } from "../components/utils/exportImage";
 import { redirectToVoucher } from "../components/utils/redirectToVoucher";
+
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../lib/firebase/config";
 
 export default function SinthesisImage() {
   const [showColorReducer, setShowColorReducer] = useState(false);
@@ -29,10 +32,20 @@ export default function SinthesisImage() {
   const stageRef = useRef<Konva.Stage>(null);
 
   const handleRedirect = () => {
-    exportToImage(stageRef); // 画像のデータURLを取得
+    const uid = unsubscribe();
+    exportToImage(stageRef, uid); // 画像のデータURLを取得
+
     redirect("/voucher");
   };
-  
+
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const uid = user.uid;
+      return uid;
+    }
+    return "guest";
+  });
+
   return (
     <div className="text-center justify-center">
       <div className="mt-[20vh] text-lg text-white font-bold">
@@ -44,15 +57,14 @@ export default function SinthesisImage() {
           setShowTextControl={setShowTextControl}
           setShowShapeControl={setShowShapeControl}
         />
-       
       </div>
       <div className={styles.CunvasBack}>
         {/* サイドバー */}
-        <ImageEditor 
+        <ImageEditor
           stageRef={stageRef}
-          imageUrl={imageUrl} 
+          imageUrl={imageUrl}
           objects={objects}
-          setObjects={setObjects} 
+          setObjects={setObjects}
         />
         <Sidebar objects={objects} setObjects={setObjects} />
       </div>
@@ -65,8 +77,6 @@ export default function SinthesisImage() {
       >
         完成
       </button>
-      
-
     </div>
   );
 }

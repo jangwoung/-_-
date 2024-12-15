@@ -58,8 +58,6 @@ export default function Camera() {
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        const uid = user.uid;
-        console.log(uid);
         initializeCamera();
       } else {
         redirect("/login");
@@ -141,7 +139,6 @@ export default function Camera() {
     }
   };
 
-
   return (
     <div className="relative w-full h-screen bg-green-dark overflow-hidden">
       {!photo ? (
@@ -191,7 +188,6 @@ export default function Camera() {
           >
             次へ
           </button>
-
         </div>
       )}
     </div>

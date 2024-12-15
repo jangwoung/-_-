@@ -4,6 +4,7 @@ import os
 from skimage import measure
 from skimage import draw
 from skimage.segmentation import active_contour
+import random
 
 ############################################################################
 def segment_person_in_box_with_improvements(image: np.ndarray, person_box: tuple) -> tuple:
@@ -44,7 +45,26 @@ def segment_person(image: np.ndarray, person_box: tuple) -> tuple:
 
     return person_roi, mask
 
+file_names = [
+    {"file": "ブルーウィングもじ02.jpg", "name": "ブルーウィング"},
+    {"file": "牡鹿鍾乳洞01.jpg", "name": "牡鹿鍾乳洞"},
+    {"file": "関門海峡ミュージアム01.jpg", "name": "関門海峡ミュージアム"},
+    {"file": "旧門司三井倶楽部01.jpg", "name": "旧門司三井倶楽部"},
+    {"file": "皿倉山夜景05.jpg", "name": "皿倉山夜景"},
+    {"file": "若戸大橋ライトアップ09.jpg", "name": "若戸大橋ライトアップ"},
+    {"file": "小倉城ライトアップ.jpg", "name": "小倉城ライトアップ"},
+    {"file": "小倉発祥焼うどん.jpg", "name": "小倉発祥焼うどん"},
+    {"file": "千仏鍾乳洞02.jpg", "name": "千仏鍾乳洞"},
+    {"file": "平尾台04.jpg", "name": "平尾台"},
+    {"file": "北九州市立美術館本館０１.jpg", "name": "北九州市立美術館本館"},
+    {"file": "門司港レトロ夜景01.jpg", "name": "門司港レトロ夜景"},
+    {"file": "門司港発祥焼きカレー.jpg", "name": "門司港発祥焼きカレー"}
+]
 
+# ランダムにファイル名だけを抽出する関数
+def get_random_file_name():
+    random_item = random.choice(file_names)
+    return random_item
 
 
 def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
@@ -80,15 +100,16 @@ def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
     #segmented_person, mask = segment_person(image, person_box)
     
     
-    Public_name = "public"
-    background_path = os.path.join(Public_name, "kyoto.jpg")
+    Public_name = "public/kitakyushu"
+    random_file = get_random_file_name()
+    background_path = os.path.join(Public_name, random_file["file"])
     background = cv2.imread(background_path)
     if background is None:
         raise FileNotFoundError(f"背景画像 {background_path} が見つかりません。")
 
     background = cv2.resize(background, (image.shape[1], image.shape[0]))
 
-    target_height = int(height * 0.8)
+    target_height = int(height * 0.4)
     person_h, person_w = segmented_person.shape[:2]
     scale = target_height / person_h
 

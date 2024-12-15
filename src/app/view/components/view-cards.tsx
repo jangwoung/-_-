@@ -131,11 +131,11 @@ export const Cards = () => {
                     No Image
                   </div>
                 )}
-                <div className="absolute bottom-2 right-2 rounded-sm px-4 bg-black">
+                {/* <div className="absolute bottom-2 right-2 rounded-sm px-4 bg-black">
                   <h1 className="text-white font-bold opacity-100">
                     #{card.name}
                   </h1>
-                </div>
+                </div> */}
               </div>
             ))}
           </div>
