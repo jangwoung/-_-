@@ -47,7 +47,7 @@ export const Menu: React.FC<MenuProps> = ({ menuOpened, setMenuOpened }) => {
             <FontAwesomeIcon icon={faCamera} className="w-12 h-12" />
             <h1>撮影</h1>
           </Link>
-          <Link href="/ticket">
+          <Link href="/voucher">
             <FontAwesomeIcon icon={faTicket} className="w-12 h-12" />
             <h1>チケット</h1>
           </Link>
