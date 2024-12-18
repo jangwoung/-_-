@@ -118,7 +118,7 @@ def extract_person_and_attach_dnn(image: np.ndarray) -> np.ndarray:
 
     person_h, person_w = resized_person.shape[:2]
     offset_x = max(0, (width - person_w) // 2)
-    offset_y = max(0, (height - target_height) // 2 + int(height * 0.1))
+    offset_y = max(0, (height - target_height) + int(height * 0.1))
 
     full_mask = np.zeros((height, width), dtype=np.uint8)
 

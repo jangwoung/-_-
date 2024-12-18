@@ -140,7 +140,7 @@ export default function Camera() {
   };
 
   return (
-    <div className="relative w-full h-screen bg-green-dark overflow-hidden">
+    <div className="relative w-full h-screen bg-black overflow-hidden">
       {!photo ? (
         <div>
           {isLoading && (
@@ -155,7 +155,7 @@ export default function Camera() {
             muted
           />
           <canvas ref={canvasRef} className="hidden"></canvas>
-          <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2">
+          <div className="absolute bottom-80 left-1/2 transform -translate-x-1/2">
             <button
               onClick={takePhoto}
               disabled={isLoading}
